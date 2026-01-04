@@ -1,309 +1,412 @@
-import React, { useState, useMemo } from 'react';
-import { Search } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>macOS Shortcuts</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-const MacOSShortcutsApp = () => {
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-  const shortcuts = [
-    // General System
-    { category: 'System', name: 'Spotlight Search', keys: ['⌘', 'Space'], desc: 'Quick search for files, apps, and more' },
-    { category: 'System', name: 'Force Quit', keys: ['⌘', '⌥', 'Esc'], desc: 'Force quit unresponsive apps' },
-    { category: 'System', name: 'Lock Screen', keys: ['⌃', '⌘', 'Q'], desc: 'Lock your Mac immediately' },
-    { category: 'System', name: 'Sleep', keys: ['⌥', '⌘', 'Power'], desc: 'Put Mac to sleep' },
-    { category: 'System', name: 'Shut Down', keys: ['⌃', '⌥', '⌘', 'Power'], desc: 'Shut down without confirmation' },
-    { category: 'System', name: 'Log Out', keys: ['⇧', '⌘', 'Q'], desc: 'Log out of user account' },
-    { category: 'System', name: 'Screenshot (Full)', keys: ['⇧', '⌘', '3'], desc: 'Capture entire screen' },
-    { category: 'System', name: 'Screenshot (Selection)', keys: ['⇧', '⌘', '4'], desc: 'Capture selected area' },
-    { category: 'System', name: 'Screenshot (Window)', keys: ['⇧', '⌘', '4', 'Space'], desc: 'Capture specific window' },
-    { category: 'System', name: 'Screenshot Options', keys: ['⇧', '⌘', '5'], desc: 'Open screenshot toolbar' },
-    { category: 'System', name: 'Emoji & Symbols', keys: ['⌃', '⌘', 'Space'], desc: 'Open emoji picker' },
-    { category: 'System', name: 'Dictation', keys: ['Fn', 'Fn'], desc: 'Start voice dictation' },
-    { category: 'System', name: 'Siri', keys: ['⌘', 'Space'], desc: 'Activate Siri (hold)' },
-    { category: 'System', name: 'Notification Center', keys: ['⌘', 'N'], desc: 'Open notifications (in Finder)' },
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
 
-    // Finder
-    { category: 'Finder', name: 'New Finder Window', keys: ['⌘', 'N'], desc: 'Open new Finder window' },
-    { category: 'Finder', name: 'New Folder', keys: ['⇧', '⌘', 'N'], desc: 'Create new folder' },
-    { category: 'Finder', name: 'New Smart Folder', keys: ['⌥', '⌘', 'N'], desc: 'Create smart folder with rules' },
-    { category: 'Finder', name: 'New Tab', keys: ['⌘', 'T'], desc: 'Open new Finder tab' },
-    { category: 'Finder', name: 'Close Window', keys: ['⌘', 'W'], desc: 'Close current window' },
-    { category: 'Finder', name: 'Close All Windows', keys: ['⌥', '⌘', 'W'], desc: 'Close all Finder windows' },
-    { category: 'Finder', name: 'Get Info', keys: ['⌘', 'I'], desc: 'Show file/folder information' },
-    { category: 'Finder', name: 'Duplicate', keys: ['⌘', 'D'], desc: 'Duplicate selected item' },
-    { category: 'Finder', name: 'Make Alias', keys: ['⌘', 'L'], desc: 'Create alias of selected item' },
-    { category: 'Finder', name: 'Show Original', keys: ['⌘', 'R'], desc: 'Show original file of alias' },
-    { category: 'Finder', name: 'Add to Sidebar', keys: ['⌃', '⌘', 'T'], desc: 'Add item to Finder sidebar' },
-    { category: 'Finder', name: 'Quick Look', keys: ['Space'], desc: 'Preview file without opening' },
-    { category: 'Finder', name: 'Go to Folder', keys: ['⇧', '⌘', 'G'], desc: 'Go to specific path' },
-    { category: 'Finder', name: 'Connect to Server', keys: ['⌘', 'K'], desc: 'Connect to network server' },
-    { category: 'Finder', name: 'Computer', keys: ['⇧', '⌘', 'C'], desc: 'Go to Computer view' },
-    { category: 'Finder', name: 'Desktop', keys: ['⇧', '⌘', 'D'], desc: 'Go to Desktop folder' },
-    { category: 'Finder', name: 'Documents', keys: ['⇧', '⌘', 'O'], desc: 'Go to Documents folder' },
-    { category: 'Finder', name: 'Downloads', keys: ['⌥', '⌘', 'L'], desc: 'Go to Downloads folder' },
-    { category: 'Finder', name: 'AirDrop', keys: ['⇧', '⌘', 'R'], desc: 'Open AirDrop' },
-    { category: 'Finder', name: 'Home', keys: ['⇧', '⌘', 'H'], desc: 'Go to Home folder' },
-    { category: 'Finder', name: 'iCloud Drive', keys: ['⇧', '⌘', 'I'], desc: 'Go to iCloud Drive' },
-    { category: 'Finder', name: 'Applications', keys: ['⇧', '⌘', 'A'], desc: 'Go to Applications folder' },
-    { category: 'Finder', name: 'Utilities', keys: ['⇧', '⌘', 'U'], desc: 'Go to Utilities folder' },
-    { category: 'Finder', name: 'Recent', keys: ['⇧', '⌘', 'F'], desc: 'Show recent files' },
-    { category: 'Finder', name: 'Back', keys: ['⌘', '['], desc: 'Go back in history' },
-    { category: 'Finder', name: 'Forward', keys: ['⌘', ']'], desc: 'Go forward in history' },
-    { category: 'Finder', name: 'Up One Level', keys: ['⌘', '↑'], desc: 'Go to parent folder' },
-    { category: 'Finder', name: 'Open Selected', keys: ['⌘', '↓'], desc: 'Open selected item' },
-    { category: 'Finder', name: 'Move to Trash', keys: ['⌘', 'Delete'], desc: 'Move item to Trash' },
-    { category: 'Finder', name: 'Empty Trash', keys: ['⇧', '⌘', 'Delete'], desc: 'Empty Trash (with warning)' },
-    { category: 'Finder', name: 'Empty Trash (Skip Warning)', keys: ['⌥', '⇧', '⌘', 'Delete'], desc: 'Empty Trash immediately' },
-    { category: 'Finder', name: 'Show/Hide Toolbar', keys: ['⌥', '⌘', 'T'], desc: 'Toggle Finder toolbar' },
-    { category: 'Finder', name: 'Show/Hide Sidebar', keys: ['⌥', '⌘', 'S'], desc: 'Toggle Finder sidebar' },
-    { category: 'Finder', name: 'Show/Hide Path Bar', keys: ['⌥', '⌘', 'P'], desc: 'Toggle path bar at bottom' },
-    { category: 'Finder', name: 'Show/Hide Status Bar', keys: ['⌘', '/'], desc: 'Toggle status bar' },
-    { category: 'Finder', name: 'Show/Hide Preview', keys: ['⇧', '⌘', 'P'], desc: 'Toggle preview pane' },
-    { category: 'Finder', name: 'View as Icons', keys: ['⌘', '1'], desc: 'Icon view' },
-    { category: 'Finder', name: 'View as List', keys: ['⌘', '2'], desc: 'List view' },
-    { category: 'Finder', name: 'View as Columns', keys: ['⌘', '3'], desc: 'Column view' },
-    { category: 'Finder', name: 'View as Gallery', keys: ['⌘', '4'], desc: 'Gallery view' },
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-    // Text Editing
-    { category: 'Text Editing', name: 'Bold', keys: ['⌘', 'B'], desc: 'Make text bold' },
-    { category: 'Text Editing', name: 'Italic', keys: ['⌘', 'I'], desc: 'Make text italic' },
-    { category: 'Text Editing', name: 'Underline', keys: ['⌘', 'U'], desc: 'Underline text' },
-    { category: 'Text Editing', name: 'Undo', keys: ['⌘', 'Z'], desc: 'Undo last action' },
-    { category: 'Text Editing', name: 'Redo', keys: ['⇧', '⌘', 'Z'], desc: 'Redo last undone action' },
-    { category: 'Text Editing', name: 'Cut', keys: ['⌘', 'X'], desc: 'Cut selection' },
-    { category: 'Text Editing', name: 'Copy', keys: ['⌘', 'C'], desc: 'Copy selection' },
-    { category: 'Text Editing', name: 'Paste', keys: ['⌘', 'V'], desc: 'Paste from clipboard' },
-    { category: 'Text Editing', name: 'Paste and Match Style', keys: ['⌥', '⇧', '⌘', 'V'], desc: 'Paste without formatting' },
-    { category: 'Text Editing', name: 'Select All', keys: ['⌘', 'A'], desc: 'Select all content' },
-    { category: 'Text Editing', name: 'Find', keys: ['⌘', 'F'], desc: 'Open find dialog' },
-    { category: 'Text Editing', name: 'Find Next', keys: ['⌘', 'G'], desc: 'Find next occurrence' },
-    { category: 'Text Editing', name: 'Find Previous', keys: ['⇧', '⌘', 'G'], desc: 'Find previous occurrence' },
-    { category: 'Text Editing', name: 'Replace', keys: ['⌥', '⌘', 'F'], desc: 'Find and replace' },
-    { category: 'Text Editing', name: 'Spelling and Grammar', keys: ['⌘', ':'], desc: 'Check spelling' },
-    { category: 'Text Editing', name: 'Show Fonts', keys: ['⌘', 'T'], desc: 'Open font panel' },
-    { category: 'Text Editing', name: 'Show Colors', keys: ['⇧', '⌘', 'C'], desc: 'Open color picker' },
-    { category: 'Text Editing', name: 'Delete Word Before', keys: ['⌥', 'Delete'], desc: 'Delete previous word' },
-    { category: 'Text Editing', name: 'Delete Word After', keys: ['Fn', '⌥', 'Delete'], desc: 'Delete next word' },
-    { category: 'Text Editing', name: 'Move to Beginning of Line', keys: ['⌘', '←'], desc: 'Jump to line start' },
-    { category: 'Text Editing', name: 'Move to End of Line', keys: ['⌘', '→'], desc: 'Jump to line end' },
-    { category: 'Text Editing', name: 'Move to Beginning of Document', keys: ['⌘', '↑'], desc: 'Jump to document start' },
-    { category: 'Text Editing', name: 'Move to End of Document', keys: ['⌘', '↓'], desc: 'Jump to document end' },
-    { category: 'Text Editing', name: 'Move One Word Left', keys: ['⌥', '←'], desc: 'Jump left one word' },
-    { category: 'Text Editing', name: 'Move One Word Right', keys: ['⌥', '→'], desc: 'Jump right one word' },
-    { category: 'Text Editing', name: 'Select to Beginning of Line', keys: ['⇧', '⌘', '←'], desc: 'Select to line start' },
-    { category: 'Text Editing', name: 'Select to End of Line', keys: ['⇧', '⌘', '→'], desc: 'Select to line end' },
-    { category: 'Text Editing', name: 'Select Word Left', keys: ['⇧', '⌥', '←'], desc: 'Select previous word' },
-    { category: 'Text Editing', name: 'Select Word Right', keys: ['⇧', '⌥', '→'], desc: 'Select next word' },
+    .header h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: #1d1d1f;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
 
-    // Window Management
-    { category: 'Window Management', name: 'Minimize Window', keys: ['⌘', 'M'], desc: 'Minimize active window' },
-    { category: 'Window Management', name: 'Minimize All', keys: ['⌥', '⌘', 'M'], desc: 'Minimize all windows' },
-    { category: 'Window Management', name: 'Hide Application', keys: ['⌘', 'H'], desc: 'Hide current app' },
-    { category: 'Window Management', name: 'Hide Others', keys: ['⌥', '⌘', 'H'], desc: 'Hide all other apps' },
-    { category: 'Window Management', name: 'Cycle Through Windows', keys: ['⌘', '`'], desc: 'Switch between app windows' },
-    { category: 'Window Management', name: 'Switch Applications', keys: ['⌘', 'Tab'], desc: 'Application switcher' },
-    { category: 'Window Management', name: 'Switch Applications (Reverse)', keys: ['⇧', '⌘', 'Tab'], desc: 'Switch apps backward' },
-    { category: 'Window Management', name: 'Quit Application', keys: ['⌘', 'Q'], desc: 'Quit current app' },
-    { category: 'Window Management', name: 'Full Screen', keys: ['⌃', '⌘', 'F'], desc: 'Toggle full screen' },
-    { category: 'Window Management', name: 'Mission Control', keys: ['⌃', '↑'], desc: 'Show all windows' },
-    { category: 'Window Management', name: 'Application Windows', keys: ['⌃', '↓'], desc: 'Show app windows' },
-    { category: 'Window Management', name: 'Show Desktop', keys: ['F11'], desc: 'Show desktop' },
-    { category: 'Window Management', name: 'Move Left a Space', keys: ['⌃', '←'], desc: 'Switch to left desktop' },
-    { category: 'Window Management', name: 'Move Right a Space', keys: ['⌃', '→'], desc: 'Switch to right desktop' },
+    .header p {
+      font-size: 17px;
+      color: #6e6e73;
+      font-weight: 400;
+    }
 
-    // Safari
-    { category: 'Safari', name: 'New Tab', keys: ['⌘', 'T'], desc: 'Open new tab' },
-    { category: 'Safari', name: 'New Private Tab', keys: ['⇧', '⌘', 'N'], desc: 'Open private browsing tab' },
-    { category: 'Safari', name: 'Close Tab', keys: ['⌘', 'W'], desc: 'Close current tab' },
-    { category: 'Safari', name: 'Reopen Last Closed Tab', keys: ['⇧', '⌘', 'T'], desc: 'Restore closed tab' },
-    { category: 'Safari', name: 'Next Tab', keys: ['⌃', 'Tab'], desc: 'Switch to next tab' },
-    { category: 'Safari', name: 'Previous Tab', keys: ['⌃', '⇧', 'Tab'], desc: 'Switch to previous tab' },
-    { category: 'Safari', name: 'Show All Tabs', keys: ['⇧', '⌘', '\\'], desc: 'Tab overview' },
-    { category: 'Safari', name: 'Reload Page', keys: ['⌘', 'R'], desc: 'Refresh current page' },
-    { category: 'Safari', name: 'Hard Reload', keys: ['⌥', '⌘', 'R'], desc: 'Reload ignoring cache' },
-    { category: 'Safari', name: 'Address Bar', keys: ['⌘', 'L'], desc: 'Focus address bar' },
-    { category: 'Safari', name: 'Add Bookmark', keys: ['⌘', 'D'], desc: 'Bookmark current page' },
-    { category: 'Safari', name: 'Show Bookmarks', keys: ['⌥', '⌘', 'B'], desc: 'Open bookmarks sidebar' },
-    { category: 'Safari', name: 'Show Reading List', keys: ['⌥', '⌘', '2'], desc: 'Open reading list' },
-    { category: 'Safari', name: 'Add to Reading List', keys: ['⇧', '⌘', 'D'], desc: 'Save to reading list' },
-    { category: 'Safari', name: 'Show Downloads', keys: ['⌥', '⌘', 'L'], desc: 'Open downloads window' },
-    { category: 'Safari', name: 'Back', keys: ['⌘', '['], desc: 'Go back one page' },
-    { category: 'Safari', name: 'Forward', keys: ['⌘', ']'], desc: 'Go forward one page' },
-    { category: 'Safari', name: 'Home', keys: ['⇧', '⌘', 'H'], desc: 'Go to homepage' },
-    { category: 'Safari', name: 'Show Web Inspector', keys: ['⌥', '⌘', 'I'], desc: 'Open developer tools' },
-    { category: 'Safari', name: 'Show Page Source', keys: ['⌥', '⌘', 'U'], desc: 'View HTML source' },
+    .categories {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      overflow-x: auto;
+      padding: 4px;
+      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+      scrollbar-width: none;
+    }
 
-    // Mail
-    { category: 'Mail', name: 'New Message', keys: ['⌘', 'N'], desc: 'Compose new email' },
-    { category: 'Mail', name: 'Reply', keys: ['⌘', 'R'], desc: 'Reply to sender' },
-    { category: 'Mail', name: 'Reply All', keys: ['⇧', '⌘', 'R'], desc: 'Reply to all recipients' },
-    { category: 'Mail', name: 'Forward', keys: ['⇧', '⌘', 'F'], desc: 'Forward email' },
-    { category: 'Mail', name: 'Send', keys: ['⇧', '⌘', 'D'], desc: 'Send email' },
-    { category: 'Mail', name: 'Attach File', keys: ['⇧', '⌘', 'A'], desc: 'Add attachment' },
-    { category: 'Mail', name: 'Mark as Read', keys: ['⇧', '⌘', 'L'], desc: 'Mark email as read' },
-    { category: 'Mail', name: 'Mark as Unread', keys: ['⇧', '⌘', 'U'], desc: 'Mark email as unread' },
-    { category: 'Mail', name: 'Mark as Junk', keys: ['⇧', '⌘', 'J'], desc: 'Move to junk' },
-    { category: 'Mail', name: 'Delete', keys: ['⌘', 'Delete'], desc: 'Move to trash' },
-    { category: 'Mail', name: 'Get New Mail', keys: ['⇧', '⌘', 'N'], desc: 'Check for new mail' },
-    { category: 'Mail', name: 'Flag', keys: ['⇧', '⌘', 'L'], desc: 'Flag email' },
+    .categories::-webkit-scrollbar {
+      display: none;
+    }
 
-    // Dock & Launchpad
-    { category: 'Dock', name: 'Show/Hide Dock', keys: ['⌥', '⌘', 'D'], desc: 'Toggle Dock visibility' },
-    { category: 'Dock', name: 'Launchpad', keys: ['F4'], desc: 'Open Launchpad' },
+    .category-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: #1d1d1f;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-    // Accessibility
-    { category: 'Accessibility', name: 'Zoom In', keys: ['⌥', '⌘', '='], desc: 'Zoom in screen' },
-    { category: 'Accessibility', name: 'Zoom Out', keys: ['⌥', '⌘', '-'], desc: 'Zoom out screen' },
-    { category: 'Accessibility', name: 'Toggle Zoom', keys: ['⌥', '⌘', '8'], desc: 'Turn zoom on/off' },
-    { category: 'Accessibility', name: 'Invert Colors', keys: ['⌃', '⌥', '⌘', '8'], desc: 'Invert display colors' },
-    { category: 'Accessibility', name: 'VoiceOver', keys: ['⌘', 'F5'], desc: 'Toggle VoiceOver' },
-    { category: 'Accessibility', name: 'Increase Contrast', keys: ['⌃', '⌥', '⌘', ','], desc: 'Boost contrast' },
-    { category: 'Accessibility', name: 'Decrease Contrast', keys: ['⌃', '⌥', '⌘', '.'], desc: 'Reduce contrast' },
+    .category-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
 
-    // Advanced Tricks
-    { category: 'Advanced', name: 'Restore Deleted File', keys: ['⌘', 'Z'], desc: 'Undo delete in Finder (immediately after)' },
-    { category: 'Advanced', name: 'Character Viewer', keys: ['⌃', '⌘', 'Space'], desc: 'Insert special characters' },
-    { category: 'Advanced', name: 'Open File Path in Terminal', keys: ['Drag to Terminal'], desc: 'Drop file/folder into Terminal' },
-    { category: 'Advanced', name: 'Spring-Loaded Folders', keys: ['Hover with Drag'], desc: 'Hold file over folder to open it' },
-    { category: 'Advanced', name: 'Merge Folders', keys: ['⌥ while dragging'], desc: 'Merge instead of replace' },
-    { category: 'Advanced', name: 'Copy Path', keys: ['⌥', '⌘', 'C'], desc: 'Copy file path in Finder' },
-    { category: 'Advanced', name: 'Show Hidden Files', keys: ['⇧', '⌘', '.'], desc: 'Toggle hidden files in Finder' },
-    { category: 'Advanced', name: 'Force Empty Trash', keys: ['⌥', '⇧', '⌘', 'Delete'], desc: 'Delete locked files' },
-    { category: 'Advanced', name: 'Safe Mode Boot', keys: ['Hold Shift at startup'], desc: 'Boot in safe mode' },
-    { category: 'Advanced', name: 'Recovery Mode', keys: ['⌘', 'R at startup'], desc: 'Boot into recovery' },
-    { category: 'Advanced', name: 'Target Disk Mode', keys: ['T at startup'], desc: 'Use Mac as external drive' },
-    { category: 'Advanced', name: 'Option Boot Menu', keys: ['⌥ at startup'], desc: 'Choose startup disk' },
-    { category: 'Advanced', name: 'Reset NVRAM/PRAM', keys: ['⌥', '⌘', 'P', 'R at startup'], desc: 'Reset system settings' },
-    { category: 'Advanced', name: 'Slow Motion Animations', keys: ['Hold Shift'], desc: 'Slow down animations (minimize, etc)' },
-    { category: 'Advanced', name: 'Force Click', keys: ['Deep press trackpad'], desc: 'Look up word, preview link' },
-    { category: 'Advanced', name: 'Three-Finger Drag', keys: ['Three fingers'], desc: 'Enable in Accessibility settings' },
-    { category: 'Advanced', name: 'Right Click', keys: ['⌃', 'Click'], desc: 'Show context menu' },
-    { category: 'Advanced', name: 'Open With', keys: ['⌥', 'Right Click'], desc: 'Choose app to open file' },
-    { category: 'Advanced', name: 'App Exposé', keys: ['⌃', '↓'], desc: 'Show all windows of app' },
-    { category: 'Advanced', name: 'Notification Center', keys: ['Two-finger swipe left from right edge'], desc: 'Swipe from right edge' },
-  ];
+    .category-btn.active {
+      background: #007aff;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+    }
 
-  const categories = ['all', ...new Set(shortcuts.map(s => s.category))];
+    .shortcuts-grid {
+      display: grid;
+      gap: 16px;
+      animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s backwards;
+    }
 
-  const filteredShortcuts = useMemo(() => {
-    return shortcuts.filter(shortcut => {
-      const matchesSearch = search === '' || 
-        shortcut.name.toLowerCase().includes(search.toLowerCase()) ||
-        shortcut.desc.toLowerCase().includes(search.toLowerCase()) ||
-        shortcut.keys.some(k => k.toLowerCase().includes(search.toLowerCase()));
-      
-      const matchesCategory = selectedCategory === 'all' || shortcut.category === selectedCategory;
-      
-      return matchesSearch && matchesCategory;
-    });
-  }, [search, selectedCategory]);
+    .shortcut-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 16px;
+      padding: 20px 24px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: default;
+      opacity: 0;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 
-  const KeyBadge = ({ keyName }) => {
-    const getKeyDisplay = (key) => {
-      const keyMap = {
-        '⌘': '⌘',
-        '⇧': '⇧',
-        '⌥': '⌥',
-        '⌃': '⌃',
-        'Fn': 'fn',
-        'Space': '␣',
-        'Delete': '⌫',
-        'Esc': 'esc',
-        'Power': '⏻',
-        '←': '←',
-        '→': '→',
-        '↑': '↑',
-        '↓': '↓',
-      };
-      return keyMap[key] || key;
-    };
+    .shortcut-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+      border-color: rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.95);
+    }
 
-    return (
-      <span className="inline-flex items-center justify-center min-w-[28px] h-[28px] px-2 bg-white/90 backdrop-blur-sm border border-gray-300/60 rounded-md shadow-sm font-sf-mono text-[13px] font-medium text-gray-800">
-        {getKeyDisplay(keyName)}
-      </span>
-    );
-  };
+    .shortcut-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 font-sf-pro">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
-              Shortcuts & Tricks
-            </h1>
-            <div className="text-sm text-gray-500 font-medium">
-              {filteredShortcuts.length} shortcuts
-            </div>
-          </div>
-          
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search shortcuts..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-100/80 backdrop-blur-sm border border-gray-200/60 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-transparent transition-all"
-            />
-          </div>
+    .shortcut-info {
+      flex: 1;
+      min-width: 0;
+    }
 
-          {/* Categories */}
-          <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-blue-500 text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {cat === 'all' ? 'All' : cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+    .shortcut-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
 
-      {/* Shortcuts List */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="space-y-2">
-          {filteredShortcuts.map((shortcut, idx) => (
-            <div
-              key={idx}
-              className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-4 hover:shadow-md hover:border-gray-300/80 transition-all group"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-[15px] font-semibold text-gray-900">
-                      {shortcut.name}
-                    </h3>
-                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                      {shortcut.category}
-                    </span>
-                  </div>
-                  <p className="text-[13px] text-gray-600 leading-relaxed">
-                    {shortcut.desc}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  {shortcut.keys.map((key, keyIdx) => (
-                    <KeyBadge key={keyIdx} keyName={key} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+    .shortcut-category {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #6e6e73;
+      background: rgba(142, 142, 147, 0.12);
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .shortcut-keys {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    .key {
+      min-width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1d1d1f;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .shortcut-card:hover .key {
+      border-color: rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .shortcut-desc {
+      font-size: 14px;
+      color: #6e6e73;
+      line-height: 1.5;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .shortcut-card:nth-child(1) { animation-delay: 0s; }
+    .shortcut-card:nth-child(2) { animation-delay: 0.05s; }
+    .shortcut-card:nth-child(3) { animation-delay: 0.1s; }
+    .shortcut-card:nth-child(4) { animation-delay: 0.15s; }
+    .shortcut-card:nth-child(5) { animation-delay: 0.2s; }
+    .shortcut-card:nth-child(6) { animation-delay: 0.25s; }
+    .shortcut-card:nth-child(7) { animation-delay: 0.3s; }
+    .shortcut-card:nth-child(8) { animation-delay: 0.35s; }
+    .shortcut-card:nth-child(9) { animation-delay: 0.4s; }
+    .shortcut-card:nth-child(10) { animation-delay: 0.45s; }
+    .shortcut-card:nth-child(n+11) { animation-delay: 0.5s; }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 24px 16px;
+      }
+
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .shortcut-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .shortcut-keys {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>macOS Shortcuts</h1>
+      <p>Master your Mac with essential keyboard shortcuts</p>
     </div>
-  );
-};
 
-export default MacOSShortcutsApp;
+    <div class="categories" id="categories"></div>
+    <div class="shortcuts-grid" id="shortcuts"></div>
+  </div>
+
+  <script>
+    var shortcuts = [];
+    
+    shortcuts.push({ category: 'System', name: 'Spotlight Search', keys: ['⌘', 'Space'], desc: 'Quick search for files, apps, and more' });
+    shortcuts.push({ category: 'System', name: 'Force Quit', keys: ['⌘', '⌥', 'Esc'], desc: 'Force quit unresponsive apps' });
+    shortcuts.push({ category: 'System', name: 'Lock Screen', keys: ['⌃', '⌘', 'Q'], desc: 'Lock your Mac immediately' });
+    shortcuts.push({ category: 'System', name: 'Screenshot Full', keys: ['⇧', '⌘', '3'], desc: 'Capture entire screen' });
+    shortcuts.push({ category: 'System', name: 'Screenshot Selection', keys: ['⇧', '⌘', '4'], desc: 'Capture selected area' });
+    shortcuts.push({ category: 'System', name: 'Screenshot Window', keys: ['⇧', '⌘', '4', 'Space'], desc: 'Capture specific window' });
+    shortcuts.push({ category: 'System', name: 'Screenshot Options', keys: ['⇧', '⌘', '5'], desc: 'Open screenshot toolbar' });
+    shortcuts.push({ category: 'System', name: 'Emoji Picker', keys: ['⌃', '⌘', 'Space'], desc: 'Open emoji picker' });
+    shortcuts.push({ category: 'Finder', name: 'New Window', keys: ['⌘', 'N'], desc: 'Open new Finder window' });
+    shortcuts.push({ category: 'Finder', name: 'New Folder', keys: ['⇧', '⌘', 'N'], desc: 'Create new folder' });
+    shortcuts.push({ category: 'Finder', name: 'New Tab', keys: ['⌘', 'T'], desc: 'Open new Finder tab' });
+    shortcuts.push({ category: 'Finder', name: 'Get Info', keys: ['⌘', 'I'], desc: 'Show file information' });
+    shortcuts.push({ category: 'Finder', name: 'Quick Look', keys: ['Space'], desc: 'Preview file without opening' });
+    shortcuts.push({ category: 'Finder', name: 'Go to Folder', keys: ['⇧', '⌘', 'G'], desc: 'Go to specific path' });
+    shortcuts.push({ category: 'Finder', name: 'Desktop', keys: ['⇧', '⌘', 'D'], desc: 'Go to Desktop folder' });
+    shortcuts.push({ category: 'Finder', name: 'Documents', keys: ['⇧', '⌘', 'O'], desc: 'Go to Documents folder' });
+    shortcuts.push({ category: 'Finder', name: 'Downloads', keys: ['⌥', '⌘', 'L'], desc: 'Go to Downloads folder' });
+    shortcuts.push({ category: 'Finder', name: 'Applications', keys: ['⇧', '⌘', 'A'], desc: 'Go to Applications folder' });
+    shortcuts.push({ category: 'Finder', name: 'Home', keys: ['⇧', '⌘', 'H'], desc: 'Go to Home folder' });
+    shortcuts.push({ category: 'Finder', name: 'Move to Trash', keys: ['⌘', 'Delete'], desc: 'Move item to Trash' });
+    shortcuts.push({ category: 'Finder', name: 'Empty Trash', keys: ['⇧', '⌘', 'Delete'], desc: 'Empty Trash with warning' });
+    shortcuts.push({ category: 'Finder', name: 'Show Hidden Files', keys: ['⇧', '⌘', '.'], desc: 'Toggle hidden files' });
+    shortcuts.push({ category: 'Text', name: 'Bold', keys: ['⌘', 'B'], desc: 'Make text bold' });
+    shortcuts.push({ category: 'Text', name: 'Italic', keys: ['⌘', 'I'], desc: 'Make text italic' });
+    shortcuts.push({ category: 'Text', name: 'Underline', keys: ['⌘', 'U'], desc: 'Underline text' });
+    shortcuts.push({ category: 'Text', name: 'Undo', keys: ['⌘', 'Z'], desc: 'Undo last action' });
+    shortcuts.push({ category: 'Text', name: 'Redo', keys: ['⇧', '⌘', 'Z'], desc: 'Redo last undone action' });
+    shortcuts.push({ category: 'Text', name: 'Cut', keys: ['⌘', 'X'], desc: 'Cut selection' });
+    shortcuts.push({ category: 'Text', name: 'Copy', keys: ['⌘', 'C'], desc: 'Copy selection' });
+    shortcuts.push({ category: 'Text', name: 'Paste', keys: ['⌘', 'V'], desc: 'Paste from clipboard' });
+    shortcuts.push({ category: 'Text', name: 'Select All', keys: ['⌘', 'A'], desc: 'Select all content' });
+    shortcuts.push({ category: 'Text', name: 'Find', keys: ['⌘', 'F'], desc: 'Open find dialog' });
+    shortcuts.push({ category: 'Text', name: 'Delete Word', keys: ['⌥', 'Delete'], desc: 'Delete previous word' });
+    shortcuts.push({ category: 'Text', name: 'Line Start', keys: ['⌘', 'Left'], desc: 'Jump to line start' });
+    shortcuts.push({ category: 'Text', name: 'Line End', keys: ['⌘', 'Right'], desc: 'Jump to line end' });
+    shortcuts.push({ category: 'Text', name: 'Document Start', keys: ['⌘', 'Up'], desc: 'Jump to document start' });
+    shortcuts.push({ category: 'Text', name: 'Document End', keys: ['⌘', 'Down'], desc: 'Jump to document end' });
+    shortcuts.push({ category: 'Window', name: 'Minimize', keys: ['⌘', 'M'], desc: 'Minimize active window' });
+    shortcuts.push({ category: 'Window', name: 'Hide App', keys: ['⌘', 'H'], desc: 'Hide current app' });
+    shortcuts.push({ category: 'Window', name: 'Hide Others', keys: ['⌥', '⌘', 'H'], desc: 'Hide all other apps' });
+    shortcuts.push({ category: 'Window', name: 'Close Window', keys: ['⌘', 'W'], desc: 'Close current window' });
+    shortcuts.push({ category: 'Window', name: 'Quit App', keys: ['⌘', 'Q'], desc: 'Quit current app' });
+    shortcuts.push({ category: 'Window', name: 'Switch Apps', keys: ['⌘', 'Tab'], desc: 'Application switcher' });
+    shortcuts.push({ category: 'Window', name: 'Cycle Windows', keys: ['⌘', 'Tilde'], desc: 'Switch between app windows' });
+    shortcuts.push({ category: 'Window', name: 'Mission Control', keys: ['⌃', 'Up'], desc: 'Show all windows' });
+    shortcuts.push({ category: 'Window', name: 'App Windows', keys: ['⌃', 'Down'], desc: 'Show app windows' });
+    shortcuts.push({ category: 'Window', name: 'Show Desktop', keys: ['F11'], desc: 'Show desktop' });
+    shortcuts.push({ category: 'Window', name: 'Full Screen', keys: ['⌃', '⌘', 'F'], desc: 'Toggle full screen' });
+    shortcuts.push({ category: 'Window', name: 'Left Space', keys: ['⌃', 'Left'], desc: 'Switch to left desktop' });
+    shortcuts.push({ category: 'Window', name: 'Right Space', keys: ['⌃', 'Right'], desc: 'Switch to right desktop' });
+    shortcuts.push({ category: 'Safari', name: 'New Tab', keys: ['⌘', 'T'], desc: 'Open new tab' });
+    shortcuts.push({ category: 'Safari', name: 'Private Tab', keys: ['⇧', '⌘', 'N'], desc: 'Open private tab' });
+    shortcuts.push({ category: 'Safari', name: 'Close Tab', keys: ['⌘', 'W'], desc: 'Close current tab' });
+    shortcuts.push({ category: 'Safari', name: 'Reopen Tab', keys: ['⇧', '⌘', 'T'], desc: 'Restore closed tab' });
+    shortcuts.push({ category: 'Safari', name: 'Next Tab', keys: ['⌃', 'Tab'], desc: 'Switch to next tab' });
+    shortcuts.push({ category: 'Safari', name: 'Reload Page', keys: ['⌘', 'R'], desc: 'Refresh current page' });
+    shortcuts.push({ category: 'Safari', name: 'Address Bar', keys: ['⌘', 'L'], desc: 'Focus address bar' });
+    shortcuts.push({ category: 'Safari', name: 'Bookmark', keys: ['⌘', 'D'], desc: 'Bookmark current page' });
+    shortcuts.push({ category: 'Mail', name: 'New Message', keys: ['⌘', 'N'], desc: 'Compose new email' });
+    shortcuts.push({ category: 'Mail', name: 'Reply', keys: ['⌘', 'R'], desc: 'Reply to sender' });
+    shortcuts.push({ category: 'Mail', name: 'Reply All', keys: ['⇧', '⌘', 'R'], desc: 'Reply to all' });
+    shortcuts.push({ category: 'Mail', name: 'Forward', keys: ['⇧', '⌘', 'F'], desc: 'Forward email' });
+    shortcuts.push({ category: 'Mail', name: 'Send', keys: ['⇧', '⌘', 'D'], desc: 'Send email' });
+    shortcuts.push({ category: 'Mail', name: 'Attach File', keys: ['⇧', '⌘', 'A'], desc: 'Add attachment' });
+    shortcuts.push({ category: 'Mail', name: 'Mark as Read', keys: ['⇧', '⌘', 'L'], desc: 'Mark email as read' });
+    shortcuts.push({ category: 'Mail', name: 'Delete', keys: ['⌘', 'Delete'], desc: 'Move to trash' });
+    shortcuts.push({ category: 'Advanced', name: 'Force Empty Trash', keys: ['⌥', '⇧', '⌘', 'Delete'], desc: 'Delete locked files' });
+    shortcuts.push({ category: 'Advanced', name: 'Copy Path', keys: ['⌥', '⌘', 'C'], desc: 'Copy file path' });
+    shortcuts.push({ category: 'Advanced', name: 'Slow Animations', keys: ['Hold Shift'], desc: 'Slow down animations' });
+    shortcuts.push({ category: 'Advanced', name: 'Right Click', keys: ['Control', 'Click'], desc: 'Show context menu' });
+    shortcuts.push({ category: 'Advanced', name: 'Merge Folders', keys: ['Option while drag'], desc: 'Merge instead of replace' });
+    shortcuts.push({ category: 'Advanced', name: 'Spring Folders', keys: ['Hover with drag'], desc: 'Hold file over folder' });
+
+    var currentCategory = 'all';
+
+    function getCategories() {
+      var cats = [];
+      var seen = {};
+      for (var i = 0; i < shortcuts.length; i++) {
+        if (!seen[shortcuts[i].category]) {
+          cats.push(shortcuts[i].category);
+          seen[shortcuts[i].category] = true;
+        }
+      }
+      return ['all'].concat(cats);
+    }
+
+    function renderCategories() {
+      var container = document.getElementById('categories');
+      var categories = getCategories();
+      var html = '';
+      
+      for (var i = 0; i < categories.length; i++) {
+        var cat = categories[i];
+        var activeClass = cat === currentCategory ? 'active' : '';
+        var displayName = cat === 'all' ? 'All Shortcuts' : cat;
+        html += '<button class="category-btn ' + activeClass + '" onclick="filterCategory(\'' + cat + '\')">' + displayName + '</button>';
+      }
+      
+      container.innerHTML = html;
+    }
+
+    function renderShortcuts() {
+      var container = document.getElementById('shortcuts');
+      var filtered = [];
+      
+      if (currentCategory === 'all') {
+        filtered = shortcuts;
+      } else {
+        for (var i = 0; i < shortcuts.length; i++) {
+          if (shortcuts[i].category === currentCategory) {
+            filtered.push(shortcuts[i]);
+          }
+        }
+      }
+      
+      var html = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var shortcut = filtered[i];
+        var keysHtml = '';
+        for (var j = 0; j < shortcut.keys.length; j++) {
+          keysHtml += '<span class="key">' + shortcut.keys[j] + '</span>';
+        }
+        
+        html += '<div class="shortcut-card">' +
+          '<div class="shortcut-header">' +
+            '<div class="shortcut-info">' +
+              '<div class="shortcut-name">' + shortcut.name + '</div>' +
+              '<span class="shortcut-category">' + shortcut.category + '</span>' +
+            '</div>' +
+            '<div class="shortcut-keys">' + keysHtml + '</div>' +
+          '</div>' +
+          '<div class="shortcut-desc">' + shortcut.desc + '</div>' +
+        '</div>';
+      }
+      
+      container.innerHTML = html;
+    }
+
+    function filterCategory(category) {
+      currentCategory = category;
+      renderCategories();
+      renderShortcuts();
+    }
+
+    renderCategories();
+    renderShortcuts();
+  </script>
+</body>
+</html>
